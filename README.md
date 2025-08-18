@@ -1,107 +1,102 @@
-AI Scheduler Prototype
+# AI Scheduler Chat Prototype
 
-A web app that parses natural language inputs (e.g., "Hey, can you put an appointment of 'seeing doctor' on Wednesday Aug 3rd, 2025 at 3:00pm?") and adds events to Google Calendar.
+A Next.js web app with a chat-like interface to test natural language parsing using `chrono-node`. Users enter scheduling inputs (e.g., "Hey, can you put an appointment of 'seeing doctor' on Wednesday Aug 3rd, 2025 at 3:00pm?"), and the app displays the parsed result as JSON.
 
-Features
+## Features
 
-Frontend: Next.js with a simple form for user input.
+- **Frontend**: Chat-style form with input field and response display.
+- **Parsing**: Uses `chrono-node` for date/time extraction and regex for summaries.
+- **Backend**: Next.js API route (`/api/parse`) to process input.
+- **Deployment**: Runnable locally or on Vercel (free tier).
 
-Parsing: Uses chrono-node to extract date/time and regex for summaries.
+## Prerequisites
 
-Authentication: Google OAuth via NextAuth.js for Calendar API access.
+- Node.js 18+ and npm.
 
-Backend: Next.js API route to process input and integrate with Google Calendar.
+## Setup
 
-Deployment: Vercel (free tier).
+1. **Clone the Repository**:
 
-Prerequisites
+   ```bash
+   git clone <repo-url>
+   cd scheduler-chat
+   ```
 
-Node.js 18+ and npm.
+2. **Install Dependencies**:
 
-Google Cloud project with Calendar API enabled and OAuth 2.0 credentials (Client ID/Secret).
+   ```bash
+   npm install
+   ```
 
-Setup
+3. **Run Locally**:
 
-Clone the Repository:
+   ```bash
+   npm run dev
+   ```
 
-git clone <repo-url>
-cd scheduler-prototype
+   Open `http://localhost:3000`.
 
-Install Dependencies:
+4. **Test the App**:
+   - Enter a scheduling request (e.g., "Hey, can you put an appointment of 'seeing doctor' on Wednesday Aug 3rd, 2025 at 3:00pm?").
+   - Submit to see the parsed JSON (summary, date, time, duration).
+   - Try inputs like:
+     - "Meeting tomorrow at 10am"
+     - "Dentist next Monday at 2pm"
+     - "See doc soon" (may fail due to vagueness)
 
-npm install
+## Example Input/Output
 
-Configure Environment Variables: Create a .env.local file:
+- **Input**: "Hey, can you put an appointment of 'seeing doctor' on Wednesday Aug 3rd, 2025 at 3:00pm?"
+- **Output**:
+  ```json
+  {
+    "message": "Parsed successfully",
+    "data": {
+      "summary": "seeing doctor",
+      "date": "2025-08-06",
+      "time": "15:00",
+      "duration_minutes": 60
+    }
+  }
+  ```
+  (Note: Aug 3, 2025, is a Sunday; chrono-node adjusts to the nearest Wednesday, Aug 6.)
 
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-random-secret
+## Limitations
 
-Get Google credentials from https://console.cloud.google.com (set redirect URI to http://localhost:3000/api/auth/callback/google).
+- **Chrono-node**: Reliable for clear date/time inputs but may fail on vague phrases (e.g., "see doc soon"). Use regex for summaries.
+- **Edge Cases**: Day mismatches (e.g., Aug 3, 2025, is Sunday) are auto-adjusted; add logic for user confirmation if needed.
+- **No Calendar Integration**: This prototype focuses on parsing; Google Calendar integration can be added later.
 
-Generate NEXTAUTH_SECRET with openssl rand -base64 32.
+## Future Improvements
 
-Run Locally:
+- **Add Google Calendar**: Integrate `googleapis` and NextAuth.js for OAuth (see previous prototype).
+- **Enhance Parsing**: Add AI/LLM (e.g., Ollama) for conversational inputs:
+  - Create a `backend` subfolder with Flask to run Ollama.
+  - Deploy Flask to Render/Heroku.
+- **UI**: Add Tailwind CSS for better styling.
+- **Features**: Support duration parsing, recurring events, or error feedback.
 
-npm run dev
+## Deployment
 
-Open http://localhost:3000.
+1. **Push to GitHub**:
 
-Sign In:
+   ```bash
+   git push origin main
+   ```
 
-Click "Sign in with Google" to authenticate.
+2. **Deploy to Vercel**:
+   - Import repo in Vercel (https://vercel.com).
+   - Deploy and access at your Vercel URL.
 
-Enter a schedule request (e.g., "Hey, can you put an appointment of 'seeing doctor' on Wednesday Aug 3rd, 2025 at 3:00pm?").
+## Troubleshooting
 
-Submit to add the event to your Google Calendar.
+- **Parsing Errors**: Ensure inputs include clear date/time phrases. Test with examples like "tomorrow at 9am".
+- **Chrono-node Limits**: For vague inputs, consider Ollama for future iterations.
+- **Errors in API Route**:
+  - Check `chrono` import (lowercase).
+  - Use `chrono.parse`, not `parseDate`.
+  - Remove invalid options like `formattedDate`.
 
-Deployment
-
-Push to GitHub:
-
-git push origin main
-
-Deploy to Vercel:
-
-Import the repo in Vercel (https://vercel.com).
-
-Set environment variables in Vercel dashboard (GOOGLE_CLIENT_ID, etc.).
-
-Deploy and access at your Vercel URL.
-
-Limitations
-
-Chrono-node: Reliable for clear date/time inputs but may struggle with vague phrases (e.g., "see doc soon"). Use regex for summaries.
-
-Duration: Currently sets events to 0-minute duration (start = end). Modify app/api/schedule/route.ts to add duration_minutes.
-
-Edge Cases: Day mismatches (e.g., Aug 3, 2025, is Sunday, not Wednesday) may require custom logic.
-
-Future Improvements
-
-Add AI/LLM: Integrate Ollama for robust NLP:
-
-Create a backend subfolder with Flask to run Ollama.
-
-Deploy Flask to Render/Heroku (Vercel doesn’t support Python).
-
-Update /api/schedule to call Flask for complex inputs.
-
-Enhance Parsing: Handle recurring events, locations, or cancellations.
-
-UI: Add styling (e.g., Tailwind CSS) and error feedback.
-
-Duration: Parse duration from input or set defaults (e.g., 60 minutes).
-
-Troubleshooting
-
-OAuth Errors: Ensure Google Cloud credentials and redirect URI match.
-
-Parsing Failures: Test with clear inputs; consider Ollama for ambiguous cases.
-
-CORS: Not applicable (monolithic app), but needed if adding a Flask backend.
-
-License
+## License
 
 MIT
