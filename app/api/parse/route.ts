@@ -31,6 +31,11 @@ export async function POST(request: Request) {
   const formattedDate = date.toISOString().split("T")[0];
   const formattedTime = date.toTimeString().slice(0, 5);
 
+  // mocking delay here
+  var delay = 2000;
+  var wait = new Promise((resolve) => setTimeout(resolve, delay));
+  await wait;
+
   return NextResponse.json({
     message: "Parsed successful",
     data: {
